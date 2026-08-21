@@ -1,0 +1,36 @@
+{
+  "name": "SceneMedic",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-contrib/features/gcloud-cli-persistent:1": {},
+    "ghcr.io/devcontainers-contrib/features/uv:1": {}
+  },
+  "postCreateCommand": "pip install -e '.[dev]' && cp -n .env.example .env || true",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "googlecloudtools.cloudcode"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "editor.formatOnSave": true,
+        "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" }
+      }
+    }
+  },
+  "forwardPorts": [8501, 8000],
+  "portsAttributes": {
+    "8501": { "label": "Streamlit UI" },
+    "8000": { "label": "Agent Engine local" }
+  },
+  "remoteEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}",
+    "GOOGLE_GENAI_USE_VERTEXAI": "true"
+  }
+}
