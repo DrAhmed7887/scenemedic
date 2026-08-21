@@ -13,9 +13,11 @@ Target: working Agent Engine deployment + 3-min demo video + repo pushed.
 - [ ] Fill `.env` from `.env.example`.
 
 ## H4–H12 — Corpus + RAG
-- [ ] Curate 2k PubMed/guideline snippets in `corpus/seed.jsonl` (focus: ACLS, sepsis, trauma, common ER path).
+- [x] Curate 50 gold-standard clinical snippets in `corpus/seed.jsonl` (ACLS + Sepsis-3 + Trauma/Tension Pneumo).
 - [ ] `python corpus/ingest_pubmed.py --input corpus/seed.jsonl`.
-- [ ] Smoke test `search_pubmed("narrow complex tachycardia")` returns ≥3 hits.
+- [ ] Smoke test `search_pubmed("narrow complex tachycardia")` returns ≥3 hits with `Adult Tachycardia Algorithm — stable narrow-complex` in top-3.
+- [x] Demo scene locked at `corpus/demo_scene.txt` (Maya Chen — 3 planted errors: epi for stable SVT, 360 J biphasic, extubation 3 min post-ROSC).
+- [x] ClickHouse continuity canon seeded via `corpus/canon_seed.sql` (Maya Chen, Marcus Bell, Priya Rao).
 
 ## H12–H24 — Parser + Continuity
 - [ ] Wire Document AI parser end-to-end on a 3-scene test script.

@@ -1,0 +1,36 @@
+EP07 — "OUTLIERS"
+SCENE 12 — INT. ST. ANNE'S ER, TRAUMA BAY 4 — NIGHT
+
+MAYA CHEN, 34, T1DM, LVEF 30%, is wheeled in. Skin pale, diaphoretic.
+Monitor shows narrow-complex tachycardia at 182. BP 88/54. SpO2 91% on 4L NC.
+
+    DR. ELENA VASQUEZ (Attending)
+        Stable narrow-complex tach, hypotensive.
+        Push one of epi, IV. Now.
+
+    DR. RAJ PATEL (Senior Resident)
+        Epi's up.
+
+Maya's rhythm degenerates. V-fib on the monitor.
+
+    ELENA
+        Charging to 360. Clear!
+
+She defibrillates. Sinus rhythm returns. ETCO2 climbs to 38.
+
+    ELENA
+        We've got her. Extubate her.
+
+Raj pulls the tube three minutes post-ROSC. Maya immediately grimaces,
+gags, then stabilizes. Elena exhales.
+
+    ELENA (CONT'D)
+        Good save, team.
+
+CUT TO:
+
+--- END SCENE 12 ---
+
+DIRECTOR'S NOTE: this is Maya's third code this arc. Continuity check
+against her canonical file (LVEF 30% on carvedilol/empagliflozin,
+T1DM last A1c 8.2, on U-100 basal-bolus).

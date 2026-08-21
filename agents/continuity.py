@@ -1,7 +1,7 @@
 """Continuity Agent — reconciles current script vs prior-episode canon in ClickHouse."""
 from google.adk.agents import Agent
 
-from tools.clickhouse_mcp import clickhouse_toolset
+from tools.clickhouse_mcp import get_continuity_tools
 
 continuity_agent = Agent(
     name="continuity",
@@ -12,5 +12,5 @@ continuity_agent = Agent(
         "(diagnoses, meds, procedures). Flag contradictions with severity="
         "'CRITICAL' if they change clinical plausibility, else 'WARN'."
     ),
-    tools=[*clickhouse_toolset.get_tools()],
+    tools=get_continuity_tools(),
 )
