@@ -1,16 +1,44 @@
-"""Imagen 3 prop generator."""
-from vertexai.preview.vision_models import ImageGenerationModel
+"""On-set prop generator via Vertex `gemini-2.5-flash-image` (nano-banana).
 
-_img = ImageGenerationModel.from_pretrained("imagen-3.0-generate-002")
+The `imagen-3.0-*` model endpoints require per-project allowlisting; the
+Gemini 2.5 Flash Image model is broadly available under the GenAI App
+Builder credit and is what we ship the demo on.
+"""
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+
+load_dotenv()
+
+_c = genai.Client(
+    vertexai=True,
+    project=os.environ["GOOGLE_CLOUD_PROJECT"],
+    location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
+)
+_MODEL = os.getenv("IMAGE_MODEL", "gemini-2.5-flash-image")
 
 
-def generate_prop(prompt: str, aspect_ratio: str = "16:9") -> str:
-    """Generate a photorealistic on-set prop image. Returns GCS URI of the asset."""
-    res = _img.generate_images(
-        prompt=prompt,
-        number_of_images=1,
-        aspect_ratio=aspect_ratio,
-        safety_filter_level="block_some",
-        person_generation="dont_allow",
+def generate_prop(prompt: str, save_to: str | None = None) -> bytes:
+    """Generate a photorealistic on-set prop image.
+
+    If `save_to` is provided, writes the PNG to that path and also returns
+    the bytes. Otherwise returns bytes only.
+    """
+    resp = _c.models.generate_content(
+        model=_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(response_modalities=["IMAGE", "TEXT"]),
     )
-    return res.images[0]._gcs_uri  # type: ignore[attr-defined]
+    for part in resp.candidates[0].content.parts:
+        if getattr(part, "inline_data", None):
+            data = part.inline_data.data
+            if save_to:
+                Path(save_to).parent.mkdir(parents=True, exist_ok=True)
+                Path(save_to).write_bytes(data)
+            return data
+    raise RuntimeError("no image part returned from model")

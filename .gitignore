@@ -21,6 +21,8 @@ scratch/
 *.mp3
 *.png
 !docs/**/*.png
+!assets/**/*.png
+!assets/**/*.wav
 
 # GCP
 service-account*.json
