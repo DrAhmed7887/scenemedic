@@ -38,6 +38,16 @@ def lookup_patient_canon(patient_name: str) -> dict[str, Any]:
     "diagnoses": [str], "medications": [str], "last_labs": {str: str},
     "notes": str}.
     """
+    empty: dict[str, Any] = {
+        "found": False,
+        "name": patient_name,
+        "age": 0,
+        "sex": "",
+        "diagnoses": [],
+        "medications": [],
+        "last_labs": {},
+        "notes": "",
+    }
     q = """
     SELECT name, age, sex, diagnoses, medications, last_labs, notes
     FROM patient_canon
@@ -47,7 +57,7 @@ def lookup_patient_canon(patient_name: str) -> dict[str, Any]:
     try:
         res = _client().query(q, parameters={"name": patient_name})
         if not res.result_rows:
-            return {"found": False, "name": patient_name}
+            return empty
         row = res.result_rows[0]
         return {
             "found": True,
@@ -61,7 +71,7 @@ def lookup_patient_canon(patient_name: str) -> dict[str, Any]:
         }
     except Exception as e:
         log.warning("clickhouse lookup failed: %s", e)
-        return {"found": False, "name": patient_name, "error": str(e)}
+        return {**empty, "error": str(e)}
 
 
 def _mcp_available() -> bool:

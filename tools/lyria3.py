@@ -1,10 +1,16 @@
-"""Lyria-002 ambient bed generator via Vertex REST :predict."""
+"""Lyria-002 ambient bed generator via Vertex REST :predict.
+
+Uses Application Default Credentials (ADC) instead of `gcloud auth
+print-access-token` so it works inside the Agent Engine runtime, which
+has no interactive gcloud shell.
+"""
 from __future__ import annotations
 
 import base64
 import os
-import subprocess
 
+import google.auth
+import google.auth.transport.requests
 import requests
 
 _PROJECT = os.environ["GOOGLE_CLOUD_PROJECT"]
@@ -31,10 +37,12 @@ MOOD_PROMPTS = {
 }
 
 
-def _token() -> str:
-    return subprocess.check_output(
-        ["gcloud", "auth", "print-access-token"], text=True
-    ).strip()
+def _adc_token() -> str:
+    creds, _ = google.auth.default(
+        scopes=["https://www.googleapis.com/auth/cloud-platform"]
+    )
+    creds.refresh(google.auth.transport.requests.Request())
+    return creds.token
 
 
 def generate_bed(mood: str, seed: int = 42) -> bytes:
@@ -46,7 +54,7 @@ def generate_bed(mood: str, seed: int = 42) -> bytes:
     )
     r = requests.post(
         url,
-        headers={"Authorization": f"Bearer {_token()}"},
+        headers={"Authorization": f"Bearer {_adc_token()}"},
         json={
             "instances": [{"prompt": prompt}],
             "parameters": {"sample_count": 1, "seed": seed},

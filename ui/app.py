@@ -8,10 +8,11 @@ Layout: three panels — script + findings, prop gallery, audio bench.
 """
 from __future__ import annotations
 
-import io
+import html
 import json
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 import streamlit as st
 
@@ -39,6 +40,21 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+
+def _safe_url(url: str) -> str:
+    """Only allow http/https URLs. Fallback to '#' for anything else."""
+    if not url:
+        return "#"
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return "#"
+    return html.escape(url, quote=True)
+
+
+def _e(text: str | None) -> str:
+    return html.escape(text or "", quote=True)
+
+
 st.title("SceneMedic")
 st.caption(
     "Physician-built multi-agent technical advisor for medical film & TV. "
@@ -56,16 +72,24 @@ with st.sidebar:
                                  type=["txt", "fountain", "md", "pdf"])
     st.divider()
     st.markdown("**Backends**")
-    st.text(f"Project: scenemedic-hackathon")
-    st.text(f"Vertex:  us-central1")
+    st.text("Project: scenemedic-hackathon")
+    st.text("Vertex:  us-central1")
 
 
 def _script_text(uploaded_file) -> str:
     if uploaded_file is None:
-        return DEMO_SCENE.read_text()
-    if uploaded_file.type == "text/plain" or uploaded_file.name.endswith((".txt", ".fountain", ".md")):
-        return uploaded_file.read().decode("utf-8", errors="ignore")
-    # PDF path — use the tool's parser
+        return DEMO_SCENE.read_text(encoding="utf-8")
+    name = uploaded_file.name.lower()
+    if name.endswith((".txt", ".fountain", ".md")) or uploaded_file.type == "text/plain":
+        raw = uploaded_file.read()
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError as e:
+            st.warning(
+                f"Script file is not valid UTF-8 ({e}). "
+                "Non-ASCII characters may have been dropped."
+            )
+            return raw.decode("utf-8", errors="replace")
     from tools.document_ai import parse_script
     tmp = REPO / "outputs" / f"_upload_{int(time.time())}.pdf"
     tmp.parent.mkdir(exist_ok=True)
@@ -105,18 +129,26 @@ with col_script:
         report = _load_report(script_text, live=False)
 
     if report:
+        if report.get("ungrounded"):
+            st.error(
+                "**No grounded snippets returned by RAG** — Clinical Agent "
+                "skipped to avoid fabricated citations. Re-run with a broader "
+                "corpus or a different query set."
+            )
         st.markdown("### Clinical findings")
         for f in report.get("findings", []):
-            c = SEVERITY_COLOR.get(f.get("severity", "INFO"), "#2563eb")
+            sev = f.get("severity", "INFO")
+            c = SEVERITY_COLOR.get(sev, "#2563eb")
             st.markdown(
                 f'<div class="finding" style="border-left-color:{c};">'
                 f'<span class="badge" style="background:{c}; color:white;">'
-                f'{f.get("severity","INFO")}</span>'
-                f'<b>Line {f.get("line_no","?")}</b> — '
-                f'<i>{f.get("original","")}</i><br>'
-                f'{f.get("issue","")}<br>'
-                f'<a href="{f.get("citation_url","#")}" target="_blank" '
-                f'style="color:#93c5fd;">{f.get("citation_title","source")}</a></div>',
+                f'{_e(sev)}</span>'
+                f'<b>Line {_e(str(f.get("line_no","?")))}</b> — '
+                f'<i>{_e(f.get("original",""))}</i><br>'
+                f'{_e(f.get("issue",""))}<br>'
+                f'<a href="{_safe_url(f.get("citation_url",""))}" target="_blank" '
+                f'rel="noopener noreferrer" style="color:#93c5fd;">'
+                f'{_e(f.get("citation_title","source"))}</a></div>',
                 unsafe_allow_html=True,
             )
             rewrites = [r for r in report.get("rewrites", [])
@@ -130,11 +162,11 @@ with col_script:
         if report.get("continuity"):
             st.markdown("### Continuity canon")
             for c in report["continuity"]:
+                dx = ", ".join(c["canon"].get("diagnoses", []))
                 st.markdown(
                     f'<div class="finding" style="border-left-color:#2563eb;">'
-                    f'<b>{c["patient"]}</b> — '
-                    f'{", ".join(c["canon"].get("diagnoses", []))}<br>'
-                    f'<small>{c.get("notes","")}</small></div>',
+                    f'<b>{_e(c["patient"])}</b> — {_e(dx)}<br>'
+                    f'<small>{_e(c.get("notes",""))}</small></div>',
                     unsafe_allow_html=True,
                 )
 

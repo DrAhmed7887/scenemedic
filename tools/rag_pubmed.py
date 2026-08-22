@@ -1,7 +1,8 @@
 """BigQuery Vector Search over the SceneMedic clinical corpus.
 
-Embeddings via google-genai (AI Studio) — no Vertex client needed, so this
-runs on the free tier while the hackathon Vertex credit is pending.
+Embeddings via google-genai on Vertex (explicit vertexai=True), so it works
+inside the Agent Engine runtime without leaking to AI Studio when
+GEMINI_API_KEY happens to be present in local dev shells.
 """
 from __future__ import annotations
 
