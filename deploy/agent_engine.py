@@ -90,9 +90,10 @@ def main() -> None:
 
     vertexai.init(project=project, location=location, staging_bucket=staging)
 
+    # GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION are RESERVED by
+    # Agent Engine — the runtime injects them automatically. Passing
+    # them here would raise FAILED_PRECONDITION.
     env_vars: dict[str, str] = {
-        "GOOGLE_CLOUD_PROJECT": project,
-        "GOOGLE_CLOUD_LOCATION": location,
         "BQ_CORPUS_DATASET": os.getenv("BQ_CORPUS_DATASET", "scenemedic"),
         "BQ_CORPUS_TABLE": os.getenv("BQ_CORPUS_TABLE", "pubmed_chunks"),
     }
