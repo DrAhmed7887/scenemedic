@@ -56,24 +56,19 @@ def _validate_env() -> dict[str, str]:
     return {k: os.environ[k] for k in REQUIRED}
 
 
-def _build_wheel() -> str:
-    """Build a fresh wheel via hatchling so agents/ and tools/ ship as
-    siblings under one importable package root (avoids extra_packages
-    import-root mismatch).
+def _source_dirs() -> list[str]:
+    """Return the SOURCE directories that Agent Engine will tar into
+    the container. NOTE: extra_packages= expects source dirs, NOT
+    wheels — a wheel gets tar-packaged but never pip-installed, so
+    cloudpickle later fails with ModuleNotFoundError. Directories are
+    untarred at the container's PYTHONPATH root, making top-level
+    imports (`from tools.X import Y`) resolve.
     """
-    dist = REPO / "dist"
-    dist.mkdir(exist_ok=True)
-    for old in dist.glob("scenemedic-*.whl"):
-        old.unlink()
-    subprocess.check_call(
-        [sys.executable, "-m", "pip", "wheel", "--no-deps", "-w", str(dist), str(REPO)],
-        cwd=str(REPO),
-    )
-    wheels = sorted(dist.glob("scenemedic-*.whl"))
-    if not wheels:
-        raise RuntimeError("wheel build produced no scenemedic-*.whl")
-    print(f"built wheel: {wheels[-1]}")
-    return str(wheels[-1])
+    dirs = [REPO / "agents", REPO / "tools"]
+    for d in dirs:
+        if not (d / "__init__.py").exists():
+            raise RuntimeError(f"{d} missing __init__.py — deploy would fail")
+    return [str(d) for d in dirs]
 
 
 def main() -> None:
@@ -82,10 +77,10 @@ def main() -> None:
     location = env["GOOGLE_CLOUD_LOCATION"]
     staging = env["GCS_STAGING_BUCKET"]
 
-    wheel = _build_wheel()
+    src_dirs = _source_dirs()
 
-    # Import after env validation + wheel build so the friendly error
-    # path runs before any implicit import-time env access.
+    # Import after env validation so the friendly error path runs
+    # before any implicit import-time env access.
     from agents.orchestrator import root_agent
 
     vertexai.init(project=project, location=location, staging_bucket=staging)
@@ -107,7 +102,7 @@ def main() -> None:
         requirements=REQUIREMENTS,
         display_name="SceneMedic",
         env_vars=env_vars,
-        extra_packages=[wheel],
+        extra_packages=src_dirs,
     )
     print("Deployed:", remote.resource_name)
     print("Env vars set:", sorted(env_vars.keys()))
