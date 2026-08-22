@@ -53,5 +53,6 @@ flowchart LR
 ## Links & assets
 
 - **GitHub Repository:** https://github.com/DrAhmed7887/scenemedic
+- **Deployed Vertex Agent Engine:** `projects/159973996965/locations/us-central1/reasoningEngines/5192502486044246016` — verified live via session-based `stream_query` returning a `gemini-2.5-pro`-answered response.
 - **Demo video (3-min pitch):** _{{TODO: paste YouTube / Loom link before submitting}}_
 - **Built with:** Google ADK, Vertex AI Agent Engine, Gemini 2.5 Pro, Gemini 2.5 Flash Image, BigQuery Vector Search, ClickHouse Cloud (MCP), Imagen 3, Lyria-002, Gemini TTS, Streamlit.

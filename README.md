@@ -6,6 +6,8 @@ Built for the **Agentic Cinema — AI Agent Hackathon**.
 
 > Devpost submission text: [docs/SUBMISSION.md](docs/SUBMISSION.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Sprint checklist: [docs/SPRINT.md](docs/SPRINT.md) · Pitch beat sheet: [docs/PITCH.md](docs/PITCH.md)
 
+**Deployed on Vertex Agent Engine:** `projects/159973996965/locations/us-central1/reasoningEngines/5192502486044246016`
+
 ---
 
 ## The demo in one screenshot's worth of words
