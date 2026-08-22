@@ -70,8 +70,10 @@ def lookup_patient_canon(patient_name: str) -> dict[str, Any]:
             "notes": row[6],
         }
     except Exception as e:
-        log.warning("clickhouse lookup failed: %s", e)
-        return {**empty, "error": str(e)}
+        # Log only the exception type — the message may echo the
+        # connection URL / credentials in some driver errors.
+        log.warning("clickhouse lookup failed: %s", type(e).__name__)
+        return {**empty, "error": type(e).__name__}
 
 
 def _mcp_available() -> bool:
@@ -103,5 +105,8 @@ def get_continuity_tools() -> list:
             )
             return list(toolset.get_tools())
         except Exception as e:
-            log.warning("MCP toolset init failed, falling back to native: %s", e)
+            log.warning(
+                "MCP toolset init failed (%s), falling back to native",
+                type(e).__name__,
+            )
     return [lookup_patient_canon]

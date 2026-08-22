@@ -92,3 +92,38 @@ def test_mcp_dispatcher_forces_native_in_managed_runtime() -> None:
         assert _mcp_available() is False
     finally:
         os.environ.pop("K_SERVICE", None)
+
+
+@pytest.mark.skipif(
+    not os.environ.get("SCENEMEDIC_TEST_PACKAGING"),
+    reason="set SCENEMEDIC_TEST_PACKAGING=1 to run the wheel-build packaging smoke",
+)
+def test_deploy_wheel_installs_and_imports(tmp_path) -> None:
+    """Build the same wheel deploy/agent_engine.py ships, install it into
+    an isolated interpreter, and verify agents/ + tools/ import as
+    siblings under a single package root (the Copilot round-3 concern)."""
+    import shutil
+    import subprocess as sp
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[1]
+    dist = repo / "dist"
+    dist.mkdir(exist_ok=True)
+    for old in dist.glob("scenemedic-*.whl"):
+        old.unlink()
+    sp.check_call([sys.executable, "-m", "pip", "wheel", "--no-deps",
+                     "-w", str(dist), str(repo)])
+    wheels = sorted(dist.glob("scenemedic-*.whl"))
+    assert wheels, "wheel build produced nothing"
+
+    # Install into isolated interpreter to prove import layout is flat.
+    venv = tmp_path / "venv"
+    sp.check_call([sys.executable, "-m", "venv", str(venv)])
+    py = venv / "bin" / "python"
+    sp.check_call([str(py), "-m", "pip", "install", "--quiet", str(wheels[-1])])
+    check = "import agents.orchestrator, tools.rag_pubmed, tools.imagen3, tools.lyria3, tools.gemini_tts, tools.clickhouse_mcp, tools.document_ai; print('ok')"
+    out = sp.check_output([str(py), "-c", check], text=True).strip()
+    assert out == "ok", out
+
+
+import sys  # noqa: E402  (kept at bottom to avoid confusing the earlier tests)

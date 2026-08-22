@@ -2,7 +2,6 @@
 
 Prereqs (one-time):
   gsutil mb -p scenemedic-hackathon -l us-central1 gs://scenemedic-staging-hackathon
-  # grant compute SA the roles it needs at runtime:
   SA=159973996965-compute@developer.gserviceaccount.com
   PROJECT=scenemedic-hackathon
   BUCKET=gs://scenemedic-staging-hackathon
@@ -11,21 +10,23 @@ Prereqs (one-time):
     gcloud projects add-iam-policy-binding $PROJECT --member="serviceAccount:$SA" --role=$R --condition=None
   done
 
-Required env vars (loaded from local .env, then forwarded to the runtime):
-  GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION,
-  BQ_CORPUS_DATASET, BQ_CORPUS_TABLE, GCS_STAGING_BUCKET
+Required env (loaded from local .env, then forwarded to the runtime):
+  GOOGLE_CLOUD_PROJECT, GOOGLE_CLOUD_LOCATION, GCS_STAGING_BUCKET
 Optional:
-  CLICKHOUSE_URL/USER/PASSWORD/DATABASE
+  BQ_CORPUS_DATASET, BQ_CORPUS_TABLE
+  CLICKHOUSE_URL / USER / PASSWORD / DATABASE
 """
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+REPO = Path(__file__).resolve().parents[1]
+load_dotenv(REPO / ".env")
 
 import vertexai
 from vertexai import agent_engines
@@ -55,14 +56,36 @@ def _validate_env() -> dict[str, str]:
     return {k: os.environ[k] for k in REQUIRED}
 
 
+def _build_wheel() -> str:
+    """Build a fresh wheel via hatchling so agents/ and tools/ ship as
+    siblings under one importable package root (avoids extra_packages
+    import-root mismatch).
+    """
+    dist = REPO / "dist"
+    dist.mkdir(exist_ok=True)
+    for old in dist.glob("scenemedic-*.whl"):
+        old.unlink()
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "wheel", "--no-deps", "-w", str(dist), str(REPO)],
+        cwd=str(REPO),
+    )
+    wheels = sorted(dist.glob("scenemedic-*.whl"))
+    if not wheels:
+        raise RuntimeError("wheel build produced no scenemedic-*.whl")
+    print(f"built wheel: {wheels[-1]}")
+    return str(wheels[-1])
+
+
 def main() -> None:
     env = _validate_env()
     project = env["GOOGLE_CLOUD_PROJECT"]
     location = env["GOOGLE_CLOUD_LOCATION"]
     staging = env["GCS_STAGING_BUCKET"]
 
-    # Import after env validation so a missing env var doesn't blow up
-    # at import time with an unfriendly KeyError.
+    wheel = _build_wheel()
+
+    # Import after env validation + wheel build so the friendly error
+    # path runs before any implicit import-time env access.
     from agents.orchestrator import root_agent
 
     vertexai.init(project=project, location=location, staging_bucket=staging)
@@ -83,7 +106,7 @@ def main() -> None:
         requirements=REQUIREMENTS,
         display_name="SceneMedic",
         env_vars=env_vars,
-        extra_packages=["./agents", "./tools"],
+        extra_packages=[wheel],
     )
     print("Deployed:", remote.resource_name)
     print("Env vars set:", sorted(env_vars.keys()))
