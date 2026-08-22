@@ -15,10 +15,52 @@ import json
 import os
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
+from pathlib import Path
 
 BILLING_ACCOUNT = os.getenv("BILLING_ACCOUNT_ID", "01C037-D624BF-1F8009")
 PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "gen-lang-client-0491760285")
+LOG_PATH = Path(__file__).resolve().parents[1] / "outputs" / "cost_log.jsonl"
+
+
+def log_cost(step: str, model: str, endpoint: str, expected_usd: float,
+              credit_expected: str, status: str = "ok", note: str = "") -> None:
+    """Append a per-step cost expectation to the session log.
+
+    `credit_expected` should be the name of the credit we believe covers this SKU
+    ("GenAI App Builder trial" | "Always Free" | "GDP monthly" | "NONE — CARD").
+    Reconcile against the Credits page at end of session or 24-48h later.
+    """
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    row = {
+        "ts": datetime.now(timezone.utc).isoformat(),
+        "step": step,
+        "model": model,
+        "endpoint": endpoint,
+        "expected_usd": expected_usd,
+        "credit_expected": credit_expected,
+        "status": status,
+        "note": note,
+    }
+    with LOG_PATH.open("a") as f:
+        f.write(json.dumps(row) + "\n")
+
+
+def print_log() -> None:
+    """Show the running session cost log."""
+    if not LOG_PATH.exists():
+        print("(no cost log yet)")
+        return
+    total = 0.0
+    print(f"\n{'ts':<20} {'step':<24} {'model':<32} {'usd':>6}  credit")
+    print("-" * 100)
+    for line in LOG_PATH.read_text().splitlines():
+        r = json.loads(line)
+        print(f"{r['ts'][:19]:<20} {r['step'][:24]:<24} "
+              f"{r['model'][:32]:<32} {r['expected_usd']:6.4f}  {r['credit_expected']}")
+        total += r["expected_usd"]
+    print("-" * 100)
+    print(f"{'TOTAL EXPECTED':<77} {total:6.4f} USD  (reconcile vs Credits page in 24-48h)")
 
 
 def _gcloud(*args: str) -> str:
