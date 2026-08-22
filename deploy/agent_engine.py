@@ -57,18 +57,30 @@ def _validate_env() -> dict[str, str]:
 
 
 def _source_dirs() -> list[str]:
-    """Return the SOURCE directories that Agent Engine will tar into
-    the container. NOTE: extra_packages= expects source dirs, NOT
-    wheels — a wheel gets tar-packaged but never pip-installed, so
-    cloudpickle later fails with ModuleNotFoundError. Directories are
-    untarred at the container's PYTHONPATH root, making top-level
-    imports (`from tools.X import Y`) resolve.
+    """Return the SOURCE directories to tar into the container.
+
+    CRITICAL: agent_engines.create() tars extra_packages preserving the
+    caller's path exactly. Passing an ABSOLUTE path (str(REPO/'tools'))
+    puts /Users/…/scenemedic/tools/ inside the tar — the container
+    untars into /code/Users/…/ and 'tools' is never on PYTHONPATH.
+
+    Fix: chdir(REPO) so relative names like "agents" / "tools" become
+    the tar's top-level entries, which unpack cleanly into /code/agents/
+    and /code/tools/ on the container root sys.path.
+
+    Also purge __pycache__ so we don't ship 3.14 bytecode into a 3.12
+    runtime.
     """
+    import shutil
     dirs = [REPO / "agents", REPO / "tools"]
     for d in dirs:
         if not (d / "__init__.py").exists():
             raise RuntimeError(f"{d} missing __init__.py — deploy would fail")
-    return [str(d) for d in dirs]
+        cache = d / "__pycache__"
+        if cache.exists():
+            shutil.rmtree(cache)
+    os.chdir(REPO)
+    return ["agents", "tools"]
 
 
 def main() -> None:
