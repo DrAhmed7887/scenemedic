@@ -1,27 +1,43 @@
-"""BigQuery Vector Search over the SceneMedic clinical corpus."""
+"""BigQuery Vector Search over the SceneMedic clinical corpus.
+
+Embeddings via google-genai (AI Studio) — no Vertex client needed, so this
+runs on the free tier while the hackathon Vertex credit is pending.
+"""
 from __future__ import annotations
 
 import os
 
+from dotenv import load_dotenv
+from google import genai
 from google.cloud import bigquery
-from vertexai.language_models import TextEmbeddingModel
+
+load_dotenv()
 
 _bq = bigquery.Client()
-_embed = TextEmbeddingModel.from_pretrained("text-embedding-004")
+_gen = genai.Client()
 
 _DATASET = os.getenv("BQ_CORPUS_DATASET", "scenemedic")
 _TABLE = os.getenv("BQ_CORPUS_TABLE", "pubmed_chunks")
+_MODEL = os.getenv("EMBED_MODEL", "gemini-embedding-001")
 
 
 def search_pubmed(query: str, k: int = 5) -> list[dict]:
-    """Semantic search over the clinical corpus. Returns list of
-    {title, snippet, url, score}."""
-    vec = _embed.get_embeddings([query])[0].values
+    """Semantic search over the clinical corpus.
+
+    Returns a list of {title, snippet, url, score}, best-first.
+    """
+    vec = list(_gen.models.embed_content(model=_MODEL, contents=query)
+               .embeddings[0].values)
     sql = f"""
-    SELECT title, snippet, url,
-           1 - ML.DISTANCE(embedding, @qvec, 'COSINE') AS score
-    FROM `{_DATASET}.{_TABLE}`
-    ORDER BY ML.DISTANCE(embedding, @qvec, 'COSINE')
+    SELECT
+      title, snippet, url,
+      (
+        SELECT SUM(a*b) / (SQRT(SUM(a*a)) * SQRT(SUM(b*b)))
+        FROM UNNEST(embedding) a WITH OFFSET p
+        JOIN UNNEST(@qvec) b WITH OFFSET q ON p = q
+      ) AS score
+    FROM `{_bq.project}.{_DATASET}.{_TABLE}`
+    ORDER BY score DESC
     LIMIT @k
     """
     job = _bq.query(
