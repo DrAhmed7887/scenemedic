@@ -18,8 +18,14 @@ import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+except ImportError:
+    pass
+
 BILLING_ACCOUNT = os.getenv("BILLING_ACCOUNT_ID", "01C037-D624BF-1F8009")
-PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "gen-lang-client-0491760285")
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "scenemedic-hackathon")
 LOG_PATH = Path(__file__).resolve().parents[1] / "outputs" / "cost_log.jsonl"
 
 
