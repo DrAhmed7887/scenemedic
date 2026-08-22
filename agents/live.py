@@ -20,11 +20,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from dotenv import load_dotenv
-
-_ROOT = Path(__file__).resolve().parents[1]
-load_dotenv(_ROOT / ".env")
-os.environ.pop("GEMINI_API_KEY", None)
+# Local-only env loading. In Agent Engine, env vars come from the
+# `env_vars=` map passed to agent_engines.create — no .env file exists.
+if not any(os.getenv(k) for k in ("K_SERVICE", "GAE_ENV",
+                                    "VERTEX_AI_AGENT_ENGINE")):
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+    except ImportError:
+        pass
+    os.environ.pop("GEMINI_API_KEY", None)
 
 from google import genai
 from google.genai import types
@@ -32,11 +37,18 @@ from google.genai import types
 from tools.clickhouse_mcp import lookup_patient_canon
 from tools.rag_pubmed import search_pubmed
 
-_client = genai.Client(
-    vertexai=True,
-    project=os.environ["GOOGLE_CLOUD_PROJECT"],
-    location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
-)
+_client: genai.Client | None = None
+
+
+def _get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        _client = genai.Client(
+            vertexai=True,
+            project=os.environ["GOOGLE_CLOUD_PROJECT"],
+            location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
+        )
+    return _client
 
 
 @dataclass(frozen=True)
@@ -111,7 +123,7 @@ def _generate_json(
     user_payload: str,
     temperature: float = 0.0,
 ) -> list[dict]:
-    resp = _client.models.generate_content(
+    resp = _get_client().models.generate_content(
         model="gemini-2.5-pro",
         contents=user_payload,
         config=types.GenerateContentConfig(

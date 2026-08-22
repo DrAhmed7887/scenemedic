@@ -6,18 +6,27 @@ import os
 from google import genai
 from google.genai import types
 
-_c = genai.Client(
-    vertexai=True,
-    project=os.environ["GOOGLE_CLOUD_PROJECT"],
-    location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
-)
+from tools._artifact import ArtifactEnvelope, to_envelope
+
+_client: genai.Client | None = None
 
 
-def multi_speaker_read(script: list[dict]) -> bytes:
+def _get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        _client = genai.Client(
+            vertexai=True,
+            project=os.environ["GOOGLE_CLOUD_PROJECT"],
+            location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
+        )
+    return _client
+
+
+def multi_speaker_read(script: list[dict]) -> ArtifactEnvelope:
     """Render a multi-speaker read on Vertex.
 
     script = [{"speaker": "Attending", "voice": "Kore", "text": "..."}, ...]
-    Returns raw PCM (audio/L16 24 kHz) bytes.
+    Returns ADK-serializable envelope of raw PCM (audio/L16 24 kHz).
     """
     cfg = types.GenerateContentConfig(
         response_modalities=["AUDIO"],
@@ -38,9 +47,13 @@ def multi_speaker_read(script: list[dict]) -> bytes:
         ),
     )
     turns = "\n".join(f'{s["speaker"]}: {s["text"]}' for s in script)
-    resp = _c.models.generate_content(
+    resp = _get_client().models.generate_content(
         model="gemini-2.5-flash-preview-tts",
         contents=turns,
         config=cfg,
     )
-    return resp.candidates[0].content.parts[0].inline_data.data
+    inline = resp.candidates[0].content.parts[0].inline_data
+    return to_envelope(
+        data=inline.data,
+        mime_type=inline.mime_type or "audio/L16;codec=pcm;rate=24000",
+    )

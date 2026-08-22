@@ -1,8 +1,7 @@
 """Lyria-002 ambient bed generator via Vertex REST :predict.
 
-Uses Application Default Credentials (ADC) instead of `gcloud auth
-print-access-token` so it works inside the Agent Engine runtime, which
-has no interactive gcloud shell.
+Uses ADC (google.auth) so it works inside Agent Engine (no gcloud shell).
+Returns an ADK-serializable envelope, not raw bytes.
 """
 from __future__ import annotations
 
@@ -13,8 +12,8 @@ import google.auth
 import google.auth.transport.requests
 import requests
 
-_PROJECT = os.environ["GOOGLE_CLOUD_PROJECT"]
-_LOC = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
+from tools._artifact import ArtifactEnvelope, to_envelope
+
 _MODEL = os.getenv("LYRIA_MODEL", "lyria-002")
 
 MOOD_PROMPTS = {
@@ -45,12 +44,14 @@ def _adc_token() -> str:
     return creds.token
 
 
-def generate_bed(mood: str, seed: int = 42) -> bytes:
-    """Return audio bytes (WAV) for an ambient bed keyed by mood label."""
+def generate_bed(mood: str, seed: int = 42) -> ArtifactEnvelope:
+    """Return an ambient bed envelope keyed by mood label."""
+    project = os.environ["GOOGLE_CLOUD_PROJECT"]
+    location = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
     prompt = MOOD_PROMPTS.get(mood, mood)
     url = (
-        f"https://{_LOC}-aiplatform.googleapis.com/v1/projects/{_PROJECT}"
-        f"/locations/{_LOC}/publishers/google/models/{_MODEL}:predict"
+        f"https://{location}-aiplatform.googleapis.com/v1/projects/{project}"
+        f"/locations/{location}/publishers/google/models/{_MODEL}:predict"
     )
     r = requests.post(
         url,
@@ -66,4 +67,5 @@ def generate_bed(mood: str, seed: int = 42) -> bytes:
     b64 = pred.get("bytesBase64Encoded") or pred.get("audio_bytes")
     if not b64:
         raise RuntimeError(f"no audio payload; keys={list(pred.keys())}")
-    return base64.b64decode(b64)
+    data = base64.b64decode(b64)
+    return to_envelope(data=data, mime_type="audio/wav")

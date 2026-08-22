@@ -30,8 +30,6 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 import vertexai
 from vertexai import agent_engines
 
-from agents.orchestrator import root_agent
-
 
 REQUIREMENTS = [
     "google-cloud-aiplatform[agent_engines,adk]>=1.101.0",
@@ -63,6 +61,10 @@ def main() -> None:
     location = env["GOOGLE_CLOUD_LOCATION"]
     staging = env["GCS_STAGING_BUCKET"]
 
+    # Import after env validation so a missing env var doesn't blow up
+    # at import time with an unfriendly KeyError.
+    from agents.orchestrator import root_agent
+
     vertexai.init(project=project, location=location, staging_bucket=staging)
 
     env_vars: dict[str, str] = {
@@ -81,6 +83,7 @@ def main() -> None:
         requirements=REQUIREMENTS,
         display_name="SceneMedic",
         env_vars=env_vars,
+        extra_packages=["./agents", "./tools"],
     )
     print("Deployed:", remote.resource_name)
     print("Env vars set:", sorted(env_vars.keys()))

@@ -52,6 +52,7 @@ def main() -> None:
                 print(f"OK  {model}: {len(data)} bytes -> {out}")
                 return
             print(f"ERR {model}: 200 but no audio payload: keys={list(pred.keys())}")
+            continue
         else:
             print(f"ERR {model}: {r.status_code} {r.text[:200]}")
 

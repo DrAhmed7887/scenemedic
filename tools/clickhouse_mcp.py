@@ -75,6 +75,11 @@ def lookup_patient_canon(patient_name: str) -> dict[str, Any]:
 
 
 def _mcp_available() -> bool:
+    # Agent Engine sets GAE_ENV / K_SERVICE / equivalent; if any managed
+    # runtime marker is present, force native (uvx won't be on PATH).
+    if any(os.getenv(k) for k in ("K_SERVICE", "GAE_ENV", "GOOGLE_CLOUD_RUN",
+                                    "VERTEX_AI_AGENT_ENGINE")):
+        return False
     return shutil.which("uvx") is not None and os.getenv("SCENEMEDIC_USE_MCP") == "1"
 
 
