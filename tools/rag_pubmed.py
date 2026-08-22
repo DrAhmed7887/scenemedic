@@ -7,14 +7,15 @@ from __future__ import annotations
 
 import os
 
-from dotenv import load_dotenv
 from google import genai
 from google.cloud import bigquery
 
-load_dotenv()
-
-_bq = bigquery.Client()
-_gen = genai.Client()
+_bq = bigquery.Client(project=os.environ["GOOGLE_CLOUD_PROJECT"])
+_gen = genai.Client(
+    vertexai=True,
+    project=os.environ["GOOGLE_CLOUD_PROJECT"],
+    location=os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1"),
+)
 
 _DATASET = os.getenv("BQ_CORPUS_DATASET", "scenemedic")
 _TABLE = os.getenv("BQ_CORPUS_TABLE", "pubmed_chunks")

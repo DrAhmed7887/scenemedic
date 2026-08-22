@@ -9,11 +9,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-
-load_dotenv()
 
 _c = genai.Client(
     vertexai=True,
