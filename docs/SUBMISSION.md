@@ -31,6 +31,12 @@ flowchart LR
     Media --> UI[3-Panel Writers' Room Studio<br/>Streamlit UI]
 ```
 
+![SceneMedic Writers' Room UI](../assets/screenshots/02_ui_writers_room.png)
+*Figure 1: SceneMedic 3-panel Writers' Room Studio running live clinical audit, voice-preserving rewrites, Imagen 3 props, and multi-voice table read.*
+
+> **Complete Cloud Telemetry & Agent Trace Guide:** [docs/AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md](AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md)
+
+
 - **Orchestration & reasoning:** Google Agent Development Kit (ADK) + Gemini 2.5 Pro on Vertex AI Agent Engine.
 - **Grounding & knowledge:** BigQuery Vector Search over PubMed ACLS / Sepsis / ATLS literature via `gemini-embedding-001` (3072-dim).
 - **State & canon continuity:** ClickHouse Cloud connected via Model Context Protocol (MCP) toolsets with a native `clickhouse-connect` fallback for Agent Engine runtimes.
@@ -56,3 +62,5 @@ flowchart LR
 - **Deployed Vertex Agent Engine:** `projects/159973996965/locations/us-central1/reasoningEngines/5192502486044246016` — verified live via session-based `stream_query` returning a `gemini-2.5-pro`-answered response.
 - **Demo video (3-min pitch):** _{{TODO: paste YouTube / Loom link before submitting}}_
 - **Built with:** Google ADK, Vertex AI Agent Engine, Gemini 2.5 Pro, Gemini 2.5 Flash Image, BigQuery Vector Search, ClickHouse Cloud (MCP), Imagen 3, Lyria-002, Gemini TTS, Streamlit.
+- **Partner track:** ClickHouse (MCP server + native driver — `tools/clickhouse_mcp.py`).
+- **Model-ID note:** Devpost resources reference "Lyria 3"; the production model available on Vertex at build time is `lyria-002`, which is the model imported and called by `tools/lyria3.py`. All docs and on-screen overlays use `Lyria-002` for accuracy.

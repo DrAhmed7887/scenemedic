@@ -26,7 +26,7 @@ Target: working Agent Engine deployment + 3-min demo video + repo pushed.
 
 ## H24–H36 — GenMedia layer
 - [ ] Confirm Imagen 3 access; ship 4 prompt templates (ECG, monitor, X-ray, drug label).
-- [ ] Confirm Lyria 3 allowlist; ship 4 mood presets.
+- [ ] Ship 4 Lyria-002 mood presets. (Note: docs previously referenced Lyria 3; production code uses `lyria-002` — no allowlist required. See `SUBMISSION.md` for the Devpost note.)
 - [ ] Multi-speaker TTS working with 4 distinct voices on Act 2 revision.
 
 ## H36–H48 — UI + Deploy

@@ -34,7 +34,7 @@ Code a functional, production-ready AI agent or multi-agent network — powered 
 - Visual VFX — Imagen 3 Image Generation Guide (mood boards, concept art, storyboard panels).
 
 ### Audio & speech generation (Lyria + Gemini TTS)
-- Lyria 3 Music Generation Guide (soundtracks, sound effects).
+- Lyria-002 Music Generation Guide (soundtracks, sound effects).
 - Gemini 3.1 Flash TTS Tutorial (expressive speech, multi-speaker).
 - Multi-Speaker Podcast Notebook.
 - Multimodal Sentiment Analysis (compare audio tone vs script text).

@@ -21,7 +21,7 @@ flowchart TB
 
         subgraph Media["GenMedia"]
             VFX[VFX/Props<br/>Imagen 3]
-            SND[Foley + Score<br/>Lyria 3]
+            SND[Foley + Score<br/>Lyria-002]
             TTS[Table Read<br/>Gemini TTS multi-speaker]
         end
 
@@ -49,6 +49,11 @@ flowchart TB
     ORCH --> UI
 ```
 
+![Multi-Agent Architecture Flow](../assets/screenshots/architecture_flow.png)
+
+> **Verified Live Deployment & Telemetry:** [docs/AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md](AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md)
+
+
 ## Layers
 
 | Layer | Component | Tech |
@@ -58,7 +63,7 @@ flowchart TB
 | Hosting | Serverless agent runtime | Vertex AI Agent Engine |
 | Grounding | Semantic search over clinical corpus | BigQuery Vector Search + `text-embedding-004` |
 | State | Per-series/per-patient canon | ClickHouse via MCP toolset |
-| GenMedia | Props, ambient audio, table read | Imagen 3, Lyria 3, Gemini TTS |
+| GenMedia | Props, ambient audio, table read | Imagen 3, Lyria-002, Gemini TTS |
 | Observability | Latency + tool-call traces | Grafana Cloud |
 | Secrets | Runtime keys | Google Secret Manager |
 
@@ -71,6 +76,6 @@ flowchart TB
 5. Clinical Agent → BigQuery RAG → findings JSON.
 6. Dramatization Agent → alternate lines JSON.
 7. VFX Agent → Imagen 3 → prop GCS URIs.
-8. Audio Agent → Lyria 3 beds + Gemini TTS table read.
+8. Audio Agent → Lyria-002 beds + Gemini TTS table read.
 9. Orchestrator assembles Realism Report bundle.
 10. (Stretch) Actor launches Live API rehearsal on-scene.

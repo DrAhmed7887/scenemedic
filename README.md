@@ -4,13 +4,18 @@
 
 Built for the **Agentic Cinema — AI Agent Hackathon**.
 
-> Devpost submission text: [docs/SUBMISSION.md](docs/SUBMISSION.md) · Architecture: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · Sprint checklist: [docs/SPRINT.md](docs/SPRINT.md) · Pitch beat sheet: [docs/PITCH.md](docs/PITCH.md)
+> **Devpost Submission:** [docs/SUBMISSION.md](docs/SUBMISSION.md) · **Agent & Cloud Telemetry:** [docs/AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md](docs/AGENT_WORKFLOW_AND_CLOUD_TELEMETRY.md) · **Architecture:** [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · **Pitch:** [docs/PITCH.md](docs/PITCH.md)
 
-**Deployed on Vertex Agent Engine:** `projects/159973996965/locations/us-central1/reasoningEngines/5192502486044246016`
+**Deployed Live on Vertex Agent Engine:** `projects/159973996965/locations/us-central1/reasoningEngines/5192502486044246016`
+
+![SceneMedic Writers' Room UI](assets/screenshots/02_ui_writers_room.png)
 
 ---
 
-## The demo in one screenshot's worth of words
+## The demo in action
+
+![Architecture & Multi-Agent Flow](assets/screenshots/architecture_flow.png)
+
 
 Give SceneMedic a bad ER scene where the attending "pushes 1 of epi" for a stable narrow-complex tachycardia, defibrillates at 360 J biphasic, and extubates the patient 3 minutes post-ROSC — SceneMedic returns:
 - **CRITICAL** / L6 — "Push one of epi, IV. Now." — Epinephrine is not indicated for stable narrow-complex tachycardia. First-line: vagal, then adenosine 6 mg IV push. → cited to AHA ACLS.

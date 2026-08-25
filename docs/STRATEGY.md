@@ -18,7 +18,7 @@ Positioning: physician-engineer bridging clinical realism and cinematic storytel
 - **Clinical Accuracy Agent** — RAG over PubMed/UpToDate summaries in BigQuery Vector Search; flags dose errors, wrong ECG rhythms, impossible timelines ("V-fib after 30 min asystole"), incorrect PPE/procedure choreography.
 - **Dramatization Agent** — rewrites flagged lines to preserve tension while staying clinically defensible; returns 2–3 alternates per fix.
 - **VFX/Prop Agent** — Imagen 3 generates monitor readouts (ECG strips, ABG panels), prop labels, X-ray/CT stills matching the scripted pathology.
-- **Foley/Score Agent** — Lyria 3 produces ambient OR/ICU beds, code-blue tension cues; Gemini TTS runs multi-speaker table reads with role-appropriate voices (attending, resident, patient, family).
+- **Foley/Score Agent** — Lyria-002 produces ambient OR/ICU beds, code-blue tension cues; Gemini TTS runs multi-speaker table reads with role-appropriate voices (attending, resident, patient, family).
 - **Continuity Agent** — ClickHouse stores per-episode canon (Patient A has DM, LVEF 30%) to catch cross-scene contradictions.
 - **Orchestrator** — Agent Engine routes and stitches deliverables into a single "Realism Report."
 
@@ -31,7 +31,7 @@ Positioning: physician-engineer bridging clinical realism and cinematic storytel
 | Grounding | BigQuery Vector Search (PubMed abstracts, UpToDate-style corpus) |
 | Continuity DB | ClickHouse via MCP Database Toolbox |
 | Visual props | Imagen 3 (monitors, imaging, prescriptions) |
-| Music/foley | Lyria 3 |
+| Music/foley | Lyria-002 |
 | Voice table read | Gemini TTS multi-speaker |
 | Live rehearsal | Gemini Live API (actor practices with attending-voice AI) |
 | Observability | Grafana on Cloud Run |
@@ -55,7 +55,7 @@ Positioning: physician-engineer bridging clinical realism and cinematic storytel
 - **Ballistics/Tox Agent** — separate sub-agent for firearms and toxicology (each is its own domain).
 - **Legal Chain-of-Custody Agent** — verifies procedural realism (Miranda phrasing, warrant scope, admissibility).
 - **Visual Reconstruction Agent** — Imagen 3 for crime-scene layouts, wound diagrams (stylized, not gratuitous), evidence bags.
-- **Ambient/Score Agent** — Lyria 3 morgue/interrogation beds; Gemini TTS for detective + coroner reads.
+- **Ambient/Score Agent** — Lyria-002 morgue/interrogation beds; Gemini TTS for detective + coroner reads.
 - **Continuity + timeline Agent** — Parallel + ClickHouse verify a 47-hour investigation timeline is internally consistent.
 
 **Tech integration matrix:** same primitives as SceneMedic, plus **Parallel** for parallel timeline branch verification (what suspect was doing at each of 12 timestamps).
@@ -79,7 +79,7 @@ Positioning: physician-engineer bridging clinical realism and cinematic storytel
 - **Live Interlocutor** — Gemini Live API bidirectional audio; actor rehearses live in-character; agent responds as patient, resident, nurse.
 - **Sentiment/Delivery Coach** — multimodal sentiment analysis: is the delivery clinically appropriate (calm-authoritative for STEMI, warm-slow for end-of-life)?
 - **Movement/Gesture Notes Agent** — via video upload of actor's rehearsal, Gemini video captioning flags wrong-hand stethoscope, incorrect gowning, wrong intubation sequence.
-- **Session Recap** — Lyria 3 for the audition sizzle reel; Imagen 3 for the case dossier (labs, images) the actor "reads" in scene.
+- **Session Recap** — Lyria-002 for the audition sizzle reel; Imagen 3 for the case dossier (labs, images) the actor "reads" in scene.
 
 **Tech integration matrix:**
 
@@ -89,7 +89,7 @@ Positioning: physician-engineer bridging clinical realism and cinematic storytel
 | Sentiment | Multimodal sentiment analysis |
 | Video feedback | Gemini video captioning |
 | Grounding | BigQuery Vector Search over physician-speech corpus |
-| Recap deliverables | Imagen 3 + Lyria 3 |
+| Recap deliverables | Imagen 3 + Lyria-002 |
 | Session state | ClickHouse via MCP |
 
 **Why it wins:**
@@ -135,7 +135,7 @@ flowchart TB
 
         subgraph Media["GenMedia Layer"]
             VFX[VFX/Prop Agent<br/>Imagen 3]
-            SND[Foley + Score Agent<br/>Lyria 3]
+            SND[Foley + Score Agent<br/>Lyria-002]
             TTS[Table Read Agent<br/>Gemini TTS multi-speaker]
         end
 
@@ -191,7 +191,7 @@ flowchart TB
 - Chest X-ray showing the pneumothorax the chest tube resolves.
 - Med cart prop labels for the correct drug boxes.
 
-**Step 6 — Audio (7–9m).** Lyria 3 renders three ambient beds: ICU quiet, code-blue tension, family-meeting silence. Gemini TTS runs a full multi-speaker table read of the revised Act 2 with distinct voices for Attending, Resident, Maya, and the family member.
+**Step 6 — Audio (7–9m).** Lyria-002 renders three ambient beds: ICU quiet, code-blue tension, family-meeting silence. Gemini TTS runs a full multi-speaker table read of the revised Act 2 with distinct voices for Attending, Resident, Maya, and the family member.
 
 **Step 7 — Deliverable (9–10m).** Orchestrator returns a **Realism Report** bundle:
 - Annotated PDF (redlined script)
@@ -357,7 +357,7 @@ def generate_prop(prompt: str, aspect_ratio: str = "16:9") -> str:
     return res.images[0]._gcs_uri
 ```
 
-**Lyria 3 ambient bed tool:**
+**Lyria-002 ambient bed tool:**
 
 ```python
 # tools/lyria3.py
@@ -443,7 +443,7 @@ print(remote.resource_name)
 
 **H24–H36 — GenMedia layer.**
 - Imagen 3 prop generator: prompt templates for ECG, monitor, X-ray, med-cart props.
-- Lyria 3 ambient beds (3 presets: ICU-quiet, code-blue, family-meeting).
+- Lyria-002 ambient beds (3 presets: ICU-quiet, code-blue, family-meeting).
 - Gemini TTS multi-speaker table read; validate with one full Act 2 revision.
 
 **H36–H48 — UI + Deploy.**
