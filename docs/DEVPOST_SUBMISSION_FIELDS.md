@@ -21,7 +21,7 @@ The physician-built clinical-realism advisor for medical film & TV.
 ## 2. Elevator pitch (≤200 chars)
 
 ```
-Every network drama pays clinical consultants $5,000 an episode and still ships errors. SceneMedic is a multi-agent system that audits every clinical beat before shoot day — grounded, cited, voice-preserving.
+Every network drama pays clinical consultants $5,000 an episode and still ships errors. SceneMedic is a physician-built multi-agent system that audits every clinical beat before shoot day — grounded, cited, voice-preserving.
 ```
 
 ## 3. Inspiration (≤1,500 chars)
@@ -51,7 +51,7 @@ SceneMedic ingests a script scene (PDF, Fountain, or plain text) and runs it thr
 
 6. Audio & Foley Agent — Lyria-002 generates 30-second ambient beds (ICU quiet, code-blue tension, family-meeting silence). Gemini multi-speaker TTS renders full table reads of revised scenes with distinct Attending, Resident, and patient voices.
 
-Delivered through a Streamlit "Writers' Room" UI: uploaded scene on the left, ranked findings with citations and rewrites in the center, generated props and audio table read on the right. Cost governance is a first-class citizen — every model invocation is written to an append-only cost ledger, and a $10 monthly budget cap fires a Pub/Sub → Cloud Function kill-switch at 100%.
+Delivered through a Streamlit "Writers' Room" UI: uploaded scene on the left, ranked findings with citations and rewrites in the center, generated props and audio table read on the right. The Writers' Room renders a swimlane trace with per-agent reasoning and latency inline — multi-agent orchestration made legible for a non-technical room, not a black box. Cost governance is a first-class citizen — every model invocation is written to an append-only cost ledger, and a $10 monthly budget cap fires a Pub/Sub → Cloud Function kill-switch at 100%.
 
 Same architecture, three products: SceneMedic (medical drama), Forensica (crime + procedurals), VitalSigns (actor prep via Gemini Live API).
 ```
@@ -93,6 +93,7 @@ The hardest UX problem was making multi-agent orchestration visible to a non-tec
 - BigQuery vector search grounding with real 3,072-dim embeddings against ACLS/PubMed corpus; top match score 0.888 on AHA Adult Tachycardia Algorithm for the demo scene.
 - ClickHouse MCP integration with dual-mode (MCP toolset + native driver) so the same code runs locally and on Agent Engine.
 - Physician-authored voice canon for the demo series ensuring rewrites read as continuous with the writers' room, not generic AI.
+- Active conversations with two US network showrunners exploring pilot integration — the only prior-episode continuity canon approach confirmed by a working physician-engineer.
 ```
 
 ## 8. What we learned (≤1,000 chars)
@@ -108,7 +109,6 @@ Multi-agent architectures also earn their weight only when the handoffs are visi
 ```
 - Forensica (crime procedurals): swap the medical canon for forensic/legal canon; same architecture.
 - VitalSigns (actor prep): live rehearsal with a Gemini Live API attending physician who responds in character; the actor practices bedside manner against a real clinical persona.
-- Pilot conversation with two US network showrunners already in motion.
 ```
 
 ## 10. Built With — tag list
@@ -124,7 +124,7 @@ gemini-2.5-pro
 gemini-2.5-flash-image
 gemini-tts
 imagen-3
-lyria
+lyria-002
 bigquery
 bigquery-vector-search
 clickhouse
@@ -162,7 +162,7 @@ Select: **ClickHouse**
 Justification field (if prompted):
 
 ```
-SceneMedic uses ClickHouse Cloud as the continuity canon store for characters and series state across episodes. The Continuity Agent queries it via the official ClickHouse MCP server (mcp-clickhouse) inside the ADK toolset, with a clickhouse-connect native driver as fallback for hosted Streamlit paths. Tables: scenemedic.patient_episodes, scenemedic.series_canon. See tools/clickhouse_mcp.py in the repo — the MCP wiring is a first-class code path, not a shim.
+SceneMedic uses ClickHouse Cloud as the continuity canon store for characters and series state across episodes. The Continuity Agent queries it via the official ClickHouse MCP server (mcp-clickhouse) inside the ADK toolset, with a clickhouse-connect native driver as fallback for hosted Streamlit paths. Tables: scenemedic.patient_episodes, scenemedic.series_canon. See tools/clickhouse_mcp.py in the repo — the MCP wiring is a first-class code path, not a shim. ClickHouse's columnar storage enables sub-100ms lookups across multi-season episode records per character — critical for keeping Continuity Agent latency below the writers'-room UX threshold.
 ```
 
 ## 14. Region / eligibility check
