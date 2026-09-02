@@ -93,7 +93,6 @@ The hardest UX problem was making multi-agent orchestration visible to a non-tec
 - BigQuery vector search grounding with real 3,072-dim embeddings against ACLS/PubMed corpus; top match score 0.888 on AHA Adult Tachycardia Algorithm for the demo scene.
 - ClickHouse MCP integration with dual-mode (MCP toolset + native driver) so the same code runs locally and on Agent Engine.
 - Physician-authored voice canon for the demo series ensuring rewrites read as continuous with the writers' room, not generic AI.
-- Active conversations with two US network showrunners exploring pilot integration — the only prior-episode continuity canon approach confirmed by a working physician-engineer.
 ```
 
 ## 8. What we learned (≤1,000 chars)
