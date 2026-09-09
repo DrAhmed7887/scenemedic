@@ -143,7 +143,7 @@ ffmpeg
 
 ```
 GitHub: https://github.com/DrAhmed7887/scenemedic
-Demo video: {{YouTube URL — paste after uploading pitch v2}}
+Demo video: https://youtu.be/9bt-Mzm-nBE
 Live agent: (Vertex Agent Engine resource, not publicly invocable — see repo for smoke-test script)
 ```
 
