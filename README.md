@@ -1,5 +1,7 @@
 # SceneMedic
 
+[![ci](https://github.com/DrAhmed7887/scenemedic/actions/workflows/ci.yml/badge.svg)](https://github.com/DrAhmed7887/scenemedic/actions/workflows/ci.yml)
+
 **A physician-built multi-agent technical advisor on Google Cloud that turns rough medical-drama scripts into clinically bulletproof shooting drafts — with matching ECGs, ICU soundscapes, and a multi-voice table read — in under 10 seconds.**
 
 Built for the **Agentic Cinema — AI Agent Hackathon**.
