@@ -166,8 +166,7 @@ SceneMedic uses ClickHouse Cloud as the continuity canon store for characters an
 
 ## 14. Region / eligibility check
 
-- Country of residence at submission: **Spain** (Ahmed relocated 2026-08).
-- Verify against Devpost §Rules exclusion list (currently excludes Italy, Brazil, Quebec, Iran, Russia, and others). Spain is eligible.
+- Region: checked against the Devpost §Rules exclusion list at submission. Eligible.
 - Age: over 18. Yes.
 - Team size: 1. Under the max-4 cap. Yes.
 
